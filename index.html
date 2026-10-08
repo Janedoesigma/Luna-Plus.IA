@@ -1,1 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Nova IA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#f1efe9;--panel:#ffffffee;--ink:#1d2330;--mut:#6b7385;--me:#1f4fd8;--ai:#e6e9f2;--line:#d9dce5;--acc:#1f4fd8;--acc2:#8a4dff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1118;--panel:#181c27ee;--ink:#e8ebf4;--mut:#8f98ad;--me:#4a74f0;--ai:#232938;--line:#2a3042;--acc:#6f93ff;--acc2:#a37bff}}
+:root[data-theme="dark"]{--bg:#0e1118;--panel:#181c27ee;--ink:#e8ebf4;--mut:#8f98ad;--me:#4a74f0;--ai:#232938;--line:#2a3042;--acc:#6f93ff;--acc2:#a37bff}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 "Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+body::before,body::after{content:"";position:fixed;z-index:-1;width:60vmax;height:60vmax;border-radius:50%;filter:blur(70px);opacity:.26;animation:fl 18s ease-in-out infinite alternate}
+body::before{background:var(--acc);top:-25vmax;left:-20vmax}
+body::after{background:var(--acc2);bottom:-28vmax;right:-22vmax;animation-delay:-9s}
+@keyframes fl{to{transform:translate(8vmax,6vmax) scale(1.15)}}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block}
+header{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.orb{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;color:#fff;flex:none;animation:br 3s ease-in-out infinite}
+.orb svg.i{width:16px;height:16px}
+.orb.big{width:68px;height:68px;margin:0 auto 14px}.orb.big svg.i{width:32px;height:32px}
+@keyframes br{50%{box-shadow:0 0 0 7px #8a4dff22;transform:scale(1.06)}}
+header h1{flex:1;font-size:16px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+button,.btn{font:inherit;color:inherit;background:none;border:1px solid var(--line);border-radius:10px;padding:7px 9px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform .12s,background .2s}
+button:active{transform:scale(.92)}
+button:focus-visible,textarea:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#me{padding:2px;border-radius:50%}
+.av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;background-size:cover;background-position:center;flex:none}
+#wrap{flex:1;display:flex;min-height:0;position:relative}
+#scrim{position:absolute;inset:0;background:#0007;opacity:0;pointer-events:none;transition:opacity .25s;z-index:4}
+#scrim.open{opacity:1;pointer-events:auto}
+aside{position:absolute;inset:0 auto 0 0;width:min(300px,82%);background:var(--panel);backdrop-filter:blur(12px);border-right:1px solid var(--line);transform:translateX(-102%);transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:5;display:flex;flex-direction:column;padding:10px;gap:8px;overflow-y:auto}
+aside.open{transform:none}
+.ci{display:flex;gap:6px;margin-bottom:6px;animation:in .3s both}
+.ci button:first-child{flex:1;justify-content:flex-start;overflow:hidden;white-space:nowrap}
+.ci.cur button:first-child{border-color:var(--acc);color:var(--acc)}
+main{flex:1;display:flex;flex-direction:column;min-width:0}
+#msgs{flex:1;overflow-y:auto;padding:14px max(12px,calc((100% - 760px)/2));display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.m{max-width:88%;padding:9px 13px;border-radius:16px;white-space:pre-wrap;word-wrap:break-word;animation:pop .35s cubic-bezier(.2,.9,.3,1.25) both}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.94)}}
+@keyframes in{from{opacity:0;transform:translateX(-10px)}}
+.u{align-self:flex-end;background:linear-gradient(135deg,var(--me),var(--acc2));color:#fff;border-bottom-right-radius:4px}
+.a{align-self:flex-start;background:var(--ai);border-bottom-left-radius:4px}
+.a.cur::after{content:"";display:inline-block;width:7px;height:15px;background:var(--acc);margin-left:3px;vertical-align:-2px;animation:bl .7s steps(2) infinite}
+@keyframes bl{50%{opacity:0}}
+.a a{display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:var(--acc);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:4px 10px}
+.a a svg.i{width:14px;height:14px}
+.acts{display:flex;gap:4px;margin-top:6px}.acts button{padding:3px 7px;border:0;opacity:.6}.acts button svg.i{width:15px;height:15px}
+.dots span{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:var(--mut);animation:b 1s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-4px)}}
+#hero{margin:auto;text-align:center;padding:16px;width:100%;max-width:520px;animation:pop .5s both}
+#hero h2{margin:0 0 4px;font-size:24px}#hero p{margin:0;color:var(--mut)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.cards button{flex-direction:column;align-items:flex-start;text-align:left;padding:12px;background:var(--panel);border-radius:14px;gap:8px;font-size:14px;line-height:1.3}
+.cards svg.i{color:var(--acc)}
+form{display:flex;gap:8px;padding:8px max(12px,calc((100% - 760px)/2)) 12px;background:var(--panel);backdrop-filter:blur(10px);border-top:1px solid var(--line);align-items:flex-end}
+textarea{flex:1;resize:none;max-height:110px;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+#send{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border:0}
+#mic.rec{background:#d62d3b;color:#fff;border-color:#d62d3b;animation:rp 1.2s infinite}
+@keyframes rp{0%{box-shadow:0 0 0 0 #d62d3b88}100%{box-shadow:0 0 0 14px #d62d3b00}}
+#st{font-size:12px;color:var(--mut);padding:0 14px 4px;min-height:16px;text-align:center}
+#prof{position:fixed;inset:0;z-index:20;display:none;background:#0008;align-items:flex-end;justify-content:center}
+#prof.open{display:flex;animation:fd .2s}
+@keyframes fd{from{opacity:0}}
+.sheet{width:min(480px,100%);max-height:92%;overflow-y:auto;background:var(--bg);border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));animation:up .35s cubic-bezier(.2,.9,.3,1)}
+@keyframes up{from{transform:translateY(100%)}}
+.who{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.who b{font-size:18px}.who small{display:block;color:var(--mut)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.card>small{color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.grid b{display:block;font-size:20px}.grid span{font-size:12px;color:var(--mut)}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>button,.row>.btn{flex:1}
+.rin{display:flex;gap:6px;margin-top:8px}
+.rin input,.rin select,#tin{flex:1;min-width:0;font:inherit;font-size:14px;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px 10px}
+.avb{width:34px;height:34px;border-radius:50%!important;padding:0!important;flex:none!important}
+.avb.on{outline:3px solid var(--acc);outline-offset:2px}
+.ch{font-size:12.5px;padding:5px 10px;border-radius:99px;flex:none!important}
+.ch.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.go{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border:0}
+.tkc{display:block;margin:8px 0;padding:8px;border-radius:8px;background:var(--bg);border:1px dashed var(--line);font:600 14px ui-monospace,monospace;word-break:break-all}
+.cb{margin:8px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg);animation:pop .3s both}
+.cbh{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--line);font-size:12px;font-weight:600;flex-wrap:wrap}
+.cbh span{flex:1;min-width:60px}.cbh button{padding:4px 8px;font-size:12px;border-radius:8px}
+.cb pre{margin:0;padding:10px;overflow-x:auto;font:12.5px/1.5 ui-monospace,Menlo,monospace;white-space:pre}
+.cb iframe{width:100%;height:300px;border:0;border-top:1px solid var(--line);background:#fff;display:block}
+.imgc{margin-top:6px}.imgc>img,.pc{width:100%;max-width:520px;border-radius:12px;background:#fff;display:block;animation:pop .5s both}
+.imgc .row{gap:6px;margin-top:8px}.imgc button{font-size:13px;padding:5px 9px}
+.shim{width:240px;height:200px;max-width:100%;border-radius:12px;background:linear-gradient(90deg,var(--ai),var(--line),var(--ai));background-size:200% 100%;animation:sh 1.2s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.shim+small{display:block;margin-top:6px;color:var(--mut)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 
+/* melhorias v6.1 */
+button:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
+button[aria-busy="true"]{pointer-events:none}
+body.busy #send{filter:saturate(.7)}
+@media(max-width:520px){
+  header{padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}
+  #msgs{padding-left:9px;padding-right:9px}
+  .m{max-width:94%}
+  form{padding-left:8px;padding-right:8px}
+  form button{min-width:42px;min-height:42px}
+  .cards{grid-template-columns:1fr}
+  .cards button{min-height:58px}
+  .sheet{max-height:96%;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+  .row>button,.row>.btn{min-height:40px}
+}
+@media(pointer:coarse){
+  button{min-height:40px}
+  .acts button{min-width:38px}
+}
+</style>
+</head>
+<body>
+<header>
+  <button id="menu" data-ic="menu"></button>
+  <div class="orb" data-ic="spark"></div>
+  <h1 id="title">Nova IA</h1>
+  <button id="web" data-ic="globe"></button>
+  <button id="vox"></button>
+  <button id="me"></button>
+</header>
+<div id="wrap">
+  <div id="scrim"></div>
+  <aside id="side">
+    <button id="new"><span data-ic="plus"></span><span id="newl"></span></button>
+    <div id="list"></div>
+  </aside>
+  <main>
+    <div id="msgs" aria-live="polite"></div>
+    <div id="st"></div>
+    <form id="f">
+      <button type="button" id="mic" data-ic="mic"></button>
+      <button type="button" id="studio" data-ic="image"></button>
+      <textarea id="in" rows="1" enterkeyhint="send"></textarea>
+      <button id="send" data-ic="send"></button>
+    </form>
+  </main>
+</div>
+<div id="prof"><div class="sheet" id="sheet"></div></div>
+<script>
+// ===== Ícones =====
+const P={
+menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',plus:'<path d="M12 5v14M5 12h14"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',
+mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+vol:'<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+mute:'<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M16 9l5 6M21 9l-5 6"/>',
+moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+send:'<path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>',
+globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5H5V6h5"/>',
+cloud:'<path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/>',
+spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/>',
+copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>',
+eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+code:'<path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/>',
+down:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',
+image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 9"/>',
+camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+check:'<path d="M5 12l5 5 9-10"/>'};
+const ic=n=>'<svg class="i" viewBox="0 0 24 24" aria-hidden="true">'+P[n]+'</svg>';
+const $=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+// ===== Idiomas (pelo navegador) =====
+const D={pt:{ajuda_texto:'Eu faço:\n• Pergunte qualquer coisa: busco a resposta na web\n• Imagens realistas de paisagens: "crie uma imagem realista de um pôr do sol no mar"\n• Ilustrações em vários estilos e códigos Lua/HTML com prévia\n• Contas, hora, data e memória ("meu nome é Ana", "aprenda: tema = resposta")\n• Voz: microfone para falar, alto-falante para eu responder\n• Perfil com foto, nome e idioma automático'},
+en:{'Nova conversa':'New chat','Pergunte qualquer coisa…':'Ask anything…','Conversas':'Chats','Busca na web':'Web search','Voz da IA':'AI voice','Perfil':'Profile','Falar':'Speak','Estúdio de imagens':'Image studio','Enviar':'Send','Ouvindo…':'Listening…','Sem reconhecimento de voz neste navegador.':'Speech recognition is not available in this browser.','Permita o microfone para falar comigo.':'Allow the microphone to talk to me.','Não consegui ouvir. Tente de novo.':"I couldn't hear you. Try again.",'Buscando a resposta…':'Looking for the answer…','Criando a imagem…':'Creating the image…','Escrevendo o código…':'Writing the code…','Copiado!':'Copied!','Não consegui baixar aqui. Use Copiar.':"Couldn't download here. Use Copy.",'Copiar':'Copy','Baixar':'Download','Prévia':'Preview','Variação':'Variation','Refinar':'Refine','Olá':'Hello','Como posso ajudar hoje?':'How can I help today?',
+'Crie uma imagem realista de um pôr do sol na montanha':'Create a realistic image of a sunset in the mountains','Crie uma página HTML de relógio':'Create an HTML clock page','Pesquise sobre buracos negros':'Search for black holes','Quanto é 15 vezes 8?':'How much is 15 times 8?',
+'Visitante':'Guest','Conta conectada, salva na nuvem':'Connected account, saved in the cloud','Conta conectada':'Connected account','Modo visitante, salvo neste aparelho':'Guest mode, saved on this device','Nome de usuário':'Username','Salvar':'Save','Foto de perfil':'Profile photo','Enviar foto':'Upload photo','Remover foto':'Remove photo','Idioma':'Language','Automático (navegador)':'Automatic (browser)','Tema':'Theme','Fechar':'Close','Apagar memória da IA':'Erase AI memory','Memória apagada.':'Memory erased.','mensagens':'messages','imagens':'images','buscas':'searches',
+'Token de usuário':'User token','Gerar meu token':'Generate my token','Atualizar nuvem':'Update cloud','Colar token para entrar':'Paste token to sign in','Entrar':'Sign in','Quem tiver o token acessa sua conta. Não compartilhe.':'Anyone with the token can access your account. Do not share it.','Token copiado.':'Token copied.','Conta salva na nuvem.':'Account saved to the cloud.','Token não encontrado.':'Token not found.','Entre no claude.ai para usar o token.':'Sign in to claude.ai to use the token.','Conta restaurada.':'Account restored.','Não foi possível agora. Tente de novo.':'Not possible right now. Try again.',
+'Descreva, escolha o estilo e crie':'Describe, pick a style and create','Ex.: um farol numa ilha ao pôr do sol':'E.g. a lighthouse on an island at sunset','Estilo':'Style','Proporção':'Ratio','Hora do dia':'Time of day','Acabamento':'Finish','Criar imagem':'Create image','Automático':'Automatic','Realista':'Realistic','Isométrico':'Isometric','Minimalista':'Minimalist','Cinematográfico':'Cinematic','Aquarela':'Watercolor','Quadrado':'Square','Paisagem':'Landscape','Retrato':'Portrait','Foto':'Photo','Amanhecer':'Dawn','Dia':'Day','Pôr do sol':'Sunset','Noite':'Night','Tempestade':'Storm','Vinheta':'Vignette','Granulado':'Grain','Brilho':'Glow','Moldura':'Frame','Cinema':'Cinema','Neblina':'Fog',
+'Refinar: deixe mais escuro, adicione a lua…':'Refine: make it darker, add the moon…','Você não autorizou a busca. Tente de novo.':'You did not allow the request. Try again.','Muitas buscas seguidas. Aguarde um pouco.':'Too many requests in a row. Wait a bit.','Não consegui agora. Tente de novo em instantes.':"Couldn't do it now. Try again shortly.",'Busca na web ligada.':'Web search on.','Busca na web desligada.':'Web search off.','Não sei isso ainda e a busca na web está desligada.':"I don't know that yet and web search is off.",
+'Sua imagem está pronta. Ajuste a hora do dia, o acabamento ou peça uma variação.':'Your image is ready. Adjust the time of day, the finish, or ask for a variation.','Sua imagem está pronta. Use o acabamento, o campo Refinar ou a Variação.':'Your image is ready. Use the finish, the Refine field or Variation.','Não consegui criar a imagem. Tente descrever de outro jeito.':"I couldn't create the image. Try describing it differently.",'Dica: paisagens saem realistas; seres e objetos têm realismo limitado.':'Tip: landscapes come out realistic; creatures and objects have limited realism.','Pronto, o código está na tela.':'Done, the code is on screen.','Sua imagem está pronta.':'Your image is ready.','Refinando…':'Refining…','Planejando a composição…':'Planning the composition…','Desenhando…':'Drawing…','Corrigindo o desenho…':'Fixing the drawing…',
+'Prazer':'Nice to meet you','Seu nome é':'Your name is','Ainda não sei seu nome.':"I don't know your name yet.",'Agora são':'The time is','Hoje é':'Today is','De nada!':'You are welcome!','Até mais!':'See you!','Anotado!':'Noted!','Sou a Nova, uma IA feita do zero em HTML e JavaScript. Crio paisagens realistas, ilustrações e códigos, e busco respostas na web.':'I am Nova, an AI built from scratch in HTML and JavaScript. I create realistic landscapes, illustrations and code, and search the web for answers.','Tudo ótimo por aqui! E você?':'All great here! And you?',
+ajuda_texto:'I can:\n• Answer anything: I look up the answer on the web\n• Realistic landscape images: "create a realistic image of a sunset at sea"\n• Illustrations in many styles and Lua/HTML code with preview\n• Math, time, date and memory ("my name is Ann", "learn: topic = answer")\n• Voice: mic to talk, speaker for me to answer\n• Profile with photo, name and automatic language'},
+es:{'Nova conversa':'Nuevo chat','Pergunte qualquer coisa…':'Pregunta lo que quieras…','Conversas':'Chats','Busca na web':'Búsqueda web','Voz da IA':'Voz de la IA','Perfil':'Perfil','Falar':'Hablar','Estúdio de imagens':'Estudio de imágenes','Enviar':'Enviar','Ouvindo…':'Escuchando…','Sem reconhecimento de voz neste navegador.':'Este navegador no tiene reconocimiento de voz.','Permita o microfone para falar comigo.':'Permite el micrófono para hablar conmigo.','Não consegui ouvir. Tente de novo.':'No pude oírte. Inténtalo de nuevo.','Buscando a resposta…':'Buscando la respuesta…','Criando a imagem…':'Creando la imagen…','Escrevendo o código…':'Escribiendo el código…','Copiado!':'¡Copiado!','Não consegui baixar aqui. Use Copiar.':'No pude descargar aquí. Usa Copiar.','Copiar':'Copiar','Baixar':'Descargar','Prévia':'Vista previa','Variação':'Variación','Refinar':'Refinar','Olá':'Hola','Como posso ajudar hoje?':'¿Cómo puedo ayudarte hoy?',
+'Crie uma imagem realista de um pôr do sol na montanha':'Crea una imagen realista de una puesta de sol en la montaña','Crie uma página HTML de relógio':'Crea una página HTML de reloj','Pesquise sobre buracos negros':'Busca información sobre los agujeros negros','Quanto é 15 vezes 8?':'¿Cuánto es 15 por 8?',
+'Visitante':'Invitado','Conta conectada, salva na nuvem':'Cuenta conectada, guardada en la nube','Conta conectada':'Cuenta conectada','Modo visitante, salvo neste aparelho':'Modo invitado, guardado en este dispositivo','Nome de usuário':'Nombre de usuario','Salvar':'Guardar','Foto de perfil':'Foto de perfil','Enviar foto':'Subir foto','Remover foto':'Quitar foto','Idioma':'Idioma','Automático (navegador)':'Automático (navegador)','Tema':'Tema','Fechar':'Cerrar','Apagar memória da IA':'Borrar memoria de la IA','Memória apagada.':'Memoria borrada.','mensagens':'mensajes','imagens':'imágenes','buscas':'búsquedas',
+'Token de usuário':'Token de usuario','Gerar meu token':'Generar mi token','Atualizar nuvem':'Actualizar nube','Colar token para entrar':'Pegar token para entrar','Entrar':'Entrar','Quem tiver o token acessa sua conta. Não compartilhe.':'Quien tenga el token accede a tu cuenta. No lo compartas.','Token copiado.':'Token copiado.','Conta salva na nuvem.':'Cuenta guardada en la nube.','Token não encontrado.':'Token no encontrado.','Entre no claude.ai para usar o token.':'Inicia sesión en claude.ai para usar el token.','Conta restaurada.':'Cuenta restaurada.','Não foi possível agora. Tente de novo.':'No se pudo ahora. Inténtalo de nuevo.',
+'Descreva, escolha o estilo e crie':'Describe, elige el estilo y crea','Ex.: um farol numa ilha ao pôr do sol':'Ej.: un faro en una isla al atardecer','Estilo':'Estilo','Proporção':'Proporción','Hora do dia':'Hora del día','Acabamento':'Acabado','Criar imagem':'Crear imagen','Automático':'Automático','Realista':'Realista','Isométrico':'Isométrico','Minimalista':'Minimalista','Cinematográfico':'Cinematográfico','Aquarela':'Acuarela','Quadrado':'Cuadrado','Paisagem':'Paisaje','Retrato':'Retrato','Foto':'Foto','Amanhecer':'Amanecer','Dia':'Día','Pôr do sol':'Atardecer','Noite':'Noche','Tempestade':'Tormenta','Vinheta':'Viñeta','Granulado':'Grano','Brilho':'Brillo','Moldura':'Marco','Cinema':'Cine','Neblina':'Niebla',
+'Refinar: deixe mais escuro, adicione a lua…':'Refinar: más oscuro, añade la luna…','Você não autorizou a busca. Tente de novo.':'No autorizaste la solicitud. Inténtalo de nuevo.','Muitas buscas seguidas. Aguarde um pouco.':'Demasiadas solicitudes seguidas. Espera un poco.','Não consegui agora. Tente de novo em instantes.':'No pude ahora. Inténtalo en un momento.','Busca na web ligada.':'Búsqueda web activada.','Busca na web desligada.':'Búsqueda web desactivada.','Não sei isso ainda e a busca na web está desligada.':'Aún no sé eso y la búsqueda web está desactivada.',
+'Sua imagem está pronta. Ajuste a hora do dia, o acabamento ou peça uma variação.':'Tu imagen está lista. Ajusta la hora, el acabado o pide una variación.','Sua imagem está pronta. Use o acabamento, o campo Refinar ou a Variação.':'Tu imagen está lista. Usa el acabado, el campo Refinar o la Variación.','Não consegui criar a imagem. Tente descrever de outro jeito.':'No pude crear la imagen. Intenta describirla de otra forma.','Dica: paisagens saem realistas; seres e objetos têm realismo limitado.':'Consejo: los paisajes salen realistas; seres y objetos tienen realismo limitado.','Pronto, o código está na tela.':'Listo, el código está en pantalla.','Sua imagem está pronta.':'Tu imagen está lista.','Refinando…':'Refinando…','Planejando a composição…':'Planificando la composición…','Desenhando…':'Dibujando…','Corrigindo o desenho…':'Corrigiendo el dibujo…',
+'Prazer':'Encantada','Seu nome é':'Tu nombre es','Ainda não sei seu nome.':'Aún no sé tu nombre.','Agora são':'Son las','Hoje é':'Hoy es','De nada!':'¡De nada!','Até mais!':'¡Hasta luego!','Anotado!':'¡Anotado!','Sou a Nova, uma IA feita do zero em HTML e JavaScript. Crio paisagens realistas, ilustrações e códigos, e busco respostas na web.':'Soy Nova, una IA hecha desde cero en HTML y JavaScript. Creo paisajes realistas, ilustraciones y código, y busco respuestas en la web.','Tudo ótimo por aqui! E você?':'¡Todo genial por aquí! ¿Y tú?',
+ajuda_texto:'Yo puedo:\n• Responder lo que quieras: busco la respuesta en la web\n• Imágenes realistas de paisajes: "crea una imagen realista de una puesta de sol en el mar"\n• Ilustraciones en varios estilos y código Lua/HTML con vista previa\n• Cuentas, hora, fecha y memoria ("me llamo Ana", "aprende: tema = respuesta")\n• Voz: micrófono para hablar, altavoz para que responda\n• Perfil con foto, nombre e idioma automático'}};
+const LN={pt:'português do Brasil',en:'English',es:'español'};
+let S={chats:[],cur:null,mem:{name:'',facts:[]},voice:true,theme:'',online:true,lang:'auto',img:{style:'auto',ratio:'1:1',time:'auto',fx:['vig','gr']},
+  profile:{name:'',photo:'',av:0},acc:{msgs:0,images:0,searches:0,joined:'',utoken:''}};
+const K='novaia.v1';
+try{const r=JSON.parse(localStorage.getItem(K)||'null');if(r){S=Object.assign(S,r);S.img=Object.assign({style:'auto',ratio:'1:1',time:'auto',fx:['vig','gr']},r.img);S.profile=Object.assign({name:'',photo:'',av:0},r.profile);S.acc=Object.assign({msgs:0,images:0,searches:0,joined:'',utoken:''},r.acc)}}catch(e){}
+const curLang=()=>{const l=S.lang==='auto'?(navigator.language||'en').slice(0,2).toLowerCase():S.lang;return LN[l]?l:'en'};
+let LG=curLang();
+const L=s=>(D[LG]&&D[LG][s])||s;
+const aiLang=()=>{if(S.lang!=='auto')return LN[S.lang]||'English';try{return new Intl.DisplayNames(['en'],{type:'language'}).of(navigator.language)}catch(e){return 'English'}};
+const speechLang=()=>S.lang==='auto'?(navigator.language||'en-US'):({pt:'pt-BR',en:'en-US',es:'es-ES'}[S.lang]||'en-US');
+
+// ===== Conta e nuvem =====
+let viewer=null,dbDoc=null,tmr=null,cloudOk=false;
+const uname=()=>S.profile.name||S.mem.name||(viewer&&viewer.name)||'';
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}if(dbDoc){clearTimeout(tmr);tmr=setTimeout(pushCloud,1200)}}
+function snap(){const d=JSON.parse(JSON.stringify(S));d.chats=d.chats.slice(0,20).map(c=>Object.assign({},c,{msgs:c.msgs.slice(-40)}));return JSON.stringify(d)}
+function pushCloud(){dbDoc.set({data:snap(),updated:Date.now()}).then(()=>{cloudOk=true}).catch(()=>{})}
+async function initAccount(){
+  try{if(!window.claude)return;const u=await claude.use('user'),db=await claude.use('db');if(!u||!db)return;
+    viewer=await u.me();if(!viewer||!viewer.id)return;
+    dbDoc=db.collection('data/users/'+viewer.id).doc('account');
+    const s=await dbDoc.get();if(s.exists){S=Object.assign(S,JSON.parse(s.data().data));if(!S.chats.length)newChat();if(!chat())S.cur=S.chats[0].id;LG=curLang()}
+    cloudOk=true}catch(e){dbDoc=null}
+  save();applyLang();renderChat()}
+function newChat(){const c={id:uid(),title:'',msgs:[]};S.chats.unshift(c);S.cur=c.id}
+const chat=()=>S.chats.find(c=>c.id===S.cur);
+if(!S.chats.length||!chat())newChat();
+
+// ===== Cérebro local =====
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w\s+\-*/().,%^=?:]/g,' ').replace(/\s+/g,' ').trim();
+const stop=new Set('o a os as um uma de do da dos das e que em no na por para com qual quem como eh e que ser sao me te se the is of to'.split(' '));
+const toks=s=>norm(s).replace(/[?.,!]/g,'').split(' ').filter(w=>w&&!stop.has(w));
+function calc(t){
+  let e=t.replace(/(quanto e|quanto eh|how much is|what is|cuanto es|calcule|calcular|calculate|resultado de|resolva)/g,'').replace(/(\d)\s*por\s*(\d)/g,'$1*$2')
+    .replace(/mais|plus/g,'+').replace(/menos|minus/g,'-').replace(/dividido por|dividido|divided by|sobre/g,'/')
+    .replace(/vezes|veces|times|multiplicado por|multiplied by|\bx\b/g,'*').replace(/elevado a|\^/g,'**').replace(/(\d),(\d)/g,'$1.$2').replace(/[?=]/g,'').trim();
+  if(!/\d/.test(e)||!/^[\d+\-*/().%\s]+$/.test(e)||!/[+\-*/%]/.test(e))return null;
+  try{const v=Function('"use strict";return ('+e+')')();if(typeof v!=='number'||!isFinite(v))return '—';return '= '+(+v.toFixed(6)).toLocaleString(navigator.language)}catch(x){return null}}
+function learned(t){const q=new Set(toks(t));if(!q.size)return null;let best=null,bs=0;
+  for(const f of S.mem.facts){const k=toks(f.q);if(!k.length)continue;const sc=k.filter(w=>q.has(w)).length/Math.max(k.length,q.size);if(sc>bs){bs=sc;best=f}}
+  return bs>=0.5?best.a:null}
+const IMGW='imagem|imagens|desenho|logo|logotipo|ilustacao|foto|fotografia|pintura|paisagem|wallpaper|poster|cartaz|avatar|mascote|personagem|image|images|picture|photo|painting|landscape|drawing|illustration|imagen|imagenes|dibujo|paisaje|ilustracion|dessin|paysage|illustration';
+const CODEW='codigo|script|programa|pagina|site|jogo|calculadora|html|lua|css|javascript|app|aplicativo|code|program|page|website|game|calculator|juego|pagina web|jeu';
+const CREATE='crie|cria|gere|gera|faca|faz|desenhe|desenha|quero|me de|create|make|generate|draw|paint|crea|genera|dibuja|haz|cree|genere|dessine|fais|creame|dame';
+const LAND=new RegExp('\\b(?:paisagem|montanha|montanhas|serra|vale|praia|mar|oceano|lago|rio|floresta|bosque|deserto|duna|neve|ceu|nuvem|nuvens|por do sol|nascer do sol|amanhecer|entardecer|noite|estrelas|lua|cidade|horizonte|landscape|mountain|mountains|beach|sea|ocean|lake|forest|desert|snow|sky|sunset|sunrise|night|stars|moon|city|skyline|paisaje|montana|montanas|playa|desierto|nieve|cielo|puesta de sol|atardecer|noche|estrellas|luna|ciudad|amanecer|paysage|montagne|plage|mer|foret|neige|ciel|ville|nuit)\\b');
+function think(raw){
+  const t=norm(raw);let m;
+  if(m=raw.match(/^\s*(?:pesquise|pesquisa|busque|buscar|google|procure|search|look up|busca|recherche|cherche)\s+(?:por\s+|sobre\s+|about\s+|for\s+|de\s+|sur\s+|información sobre\s+)?(.+)/i))return{web:m[1].trim()};
+  if(new RegExp('^(?:'+CREATE+')\\b.*\\b(?:'+IMGW+')\\b').test(t)||/^(?:desenhe|desenha|draw|dibuja|dessine)\s+\S+/.test(t))return{img:raw};
+  if(new RegExp('^(?:'+CREATE+'|escreva|escreve|monte|programe|write|build|code|escribe|ecris)\\b.*\\b(?:'+CODEW+')\\b').test(t))return{code:raw};
+  if(m=raw.match(/^\s*(?:aprenda|lembre|memorize|learn|remember|aprende|recuerda|apprends)\s*:?\s*(.+?)\s*=\s*(.+)$/i)){S.mem.facts.push({q:m[1],a:m[2]});return L('Anotado!')}
+  if(m=t.match(/^(?:meu nome e|me chamo|pode me chamar de|my name is|call me|me llamo|mi nombre es|llamame|je m appelle)\s+([a-z]+)/)){S.profile.name=m[1][0].toUpperCase()+m[1].slice(1);syncUI();return L('Prazer')+', '+S.profile.name+'!'}
+  if(/(qual (e )?(o )?meu nome|what is my name|cual es mi nombre|who am i|quem sou eu)/.test(t))return uname()?L('Seu nome é')+' '+uname()+'.':L('Ainda não sei seu nome.');
+  if(/^(oi|ola|e ai|opa|bom dia|boa tarde|boa noite|hello|hi|hey|good morning|good evening|hola|buenos dias|buenas tardes|buenas noches|bonjour|salut)\b/.test(t))return L('Olá')+(uname()?', '+uname():'')+'! '+L('Como posso ajudar hoje?');
+  if(/(tudo bem|como vai|how are you|como estas|como esta voce)/.test(t))return L('Tudo ótimo por aqui! E você?');
+  if(/(quem (e )?voce|who are you|quien eres|o que (e )?voce)/.test(t))return L('Sou a Nova, uma IA feita do zero em HTML e JavaScript. Crio paisagens realistas, ilustrações e códigos, e busco respostas na web.');
+  if(/(que horas|horas sao|what time|que hora)/.test(t))return L('Agora são')+' '+new Date().toLocaleTimeString(navigator.language,{hour:'2-digit',minute:'2-digit'})+'.';
+  if(/(que dia|data de hoje|what day|date today|que fecha|dia es hoy)/.test(t))return L('Hoje é')+' '+new Date().toLocaleDateString(navigator.language,{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'.';
+  if(/(obrigad|valeu|thanks|thank you|gracias)/.test(t))return L('De nada!');
+  if(/^(tchau|ate mais|adeus|bye|goodbye|adios|hasta luego)/.test(t))return L('Até mais!');
+  if(/^(ajuda|help|ayuda|aide|comandos)/.test(t))return L('ajuda_texto');
+  return calc(t)||learned(raw)||null}
+
+// ===== IA (capacidade sample) =====
+let sp=null;const getSample=()=>sp||(sp=(window.claude?claude.use('sample'):Promise.resolve(null)).catch(()=>null));
+const gUrl=q=>'https://www.google.com/search?q='+encodeURIComponent(q);
+async function aiCall(p,onText,tier){const sm=await getSample();if(!sm)throw{code:'none'};const o={onText:x=>onText(x.text),cache:false};if(tier)o.modelTier=tier;return (await sm(p,o)).text}
+function webPrompt(q){const hist=chat().msgs.slice(-9,-1).map(m=>(m.r==='u'?'U: ':'Nova: ')+m.t).join('\n');
+  return 'Você é a Nova, assistente. Responda no idioma: '+aiLang()+'. Texto simples, no máximo 4 frases curtas, direta e honesta; se não tiver certeza ou a informação puder estar desatualizada, diga.\n\n'+(hist?hist+'\n\n':'')+'Pergunta: '+q+'\nResposta:'}
+const codePrompt=t=>'Você é a Nova, programadora. Responda no idioma: '+aiLang()+', com UMA frase curta e depois UM único bloco de código com crases triplas e a linguagem (html, lua, css ou js). Para páginas, um HTML completo com CSS e JS embutidos, sem recursos externos, visual caprichado e responsivo, no máximo 150 linhas. Pedido: '+t;
+function errText(e){
+  if(e&&e.code==='not_granted')return L('Você não autorizou a busca. Tente de novo.');
+  if(e&&e.code==='rate_limited')return L('Muitas buscas seguidas. Aguarde um pouco.');
+  return L('Não consegui agora. Tente de novo em instantes.')}
+
+// ===== Imagens: SVG (ilustração) =====
+const RATIOS={'1:1':[512,512],'16:9':[768,432],'9:16':[432,768],'4:3':[640,480]};
+const STYL=[['auto','Automático'],['real','Realista'],['flat','Flat'],['neon','Neon'],['aq','Aquarela'],['iso','Isométrico'],['pix','Pixel art'],['min','Minimalista'],['cin','Cinematográfico'],['ani','Anime'],['logo','Logo']];
+const STY={auto:'livre: escolha o estilo que melhor combina com o pedido, com acabamento profissional',
+real:'fotorrealista: iluminação suave de estúdio, gradientes sutis, sombras de contato, profundidade de campo com fundo desfocado (feGaussianBlur), texturas com feTurbulence, reflexos e brilho especular, cores naturais',
+flat:'ilustração vetorial flat moderna, formas limpas, paleta harmoniosa',neon:'cyberpunk neon, fundo escuro, brilhos intensos (glow), magenta, ciano e violeta',
+aq:'aquarela suave, manchas translúcidas sobrepostas, bordas macias, textura de papel',iso:'ilustração isométrica 3D a 30 graus, blocos com três faces sombreadas, cores pastel',
+pix:'pixel art 16-bit com retângulos em grade e paleta limitada',min:'minimalista, poucas formas, espaço negativo, duas ou três cores',
+cin:'cena cinematográfica, iluminação dramática, profundidade com névoa, contraste rico',ani:'estilo anime, contornos finos, cel shading, céu detalhado',logo:'logotipo profissional, simétrico, formas geométricas precisas, fundo simples'};
+const planPrompt=(t,sty,r)=>'Você é diretora de arte. Pedido: "'+t+'". Estilo: '+sty+'. Tela: '+r[0]+'x'+r[1]+'. Em até 140 palavras, sem código: composição (fundo, plano médio, assunto, primeiro plano), paleta de 5 a 7 cores em hexadecimal, direção da luz, 6 a 10 elementos com posição aproximada e detalhes que dão vida.';
+const imgPrompt=(t,plan,sty,r)=>'Você é uma ilustradora vetorial premiada. Crie uma obra em SVG para: "'+t+'".\nEstilo: '+sty+'.\nTamanho: viewBox="0 0 '+r[0]+' '+r[1]+'".\n'+(plan?'Direção de arte, siga com fidelidade:\n'+plan+'\n':'')+
+'Regras: 1) camadas <g id>: fundo, plano distante, médio, assunto, primeiro plano, iluminação. 2) fundo nunca vazio: gradiente cobrindo a tela. 3) linearGradient/radialGradient em quase toda forma grande. 4) profundidade: sombras com feGaussianBlur, brilhos, névoa, luz de contorno. 5) paleta coesa de 5 a 7 cores e uma só fonte de luz. 6) curvas Bézier (C, Q, S) para formas orgânicas. 7) detalhes finos: texturas, partículas, reflexos. 8) 60 a 150 elementos; assunto grande, central e reconhecível. 9) sem texto, sem imagens externas, sem scripts, sem foreignObject, sem markdown.\nResponda SOMENTE com o SVG completo, de <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+r[0]+' '+r[1]+'"> até </svg>.';
+const fixPrompt=raw=>'O SVG abaixo está inválido ou cortado. Corrija e devolva o SVG completo e válido. Responda SOMENTE com o SVG.\n\n'+raw.slice(0,14000);
+const refinePrompt=(svg,ins)=>'SVG atual:\n'+svg.slice(0,16000)+'\n\nAlteração pedida: "'+ins+'".\nReescreva o SVG completo aplicando a alteração, mantendo composição, qualidade e viewBox. Responda SOMENTE com o SVG.';
+function tidy(raw){const i=raw.search(/<svg[\s>]/i);if(i<0)return null;let t=raw.slice(i);const e=t.search(/<\/svg>/i);if(e>=0)return t.slice(0,e+6);
+  t=t.replace(/<[^>]*$/,'');const st=[];t.replace(/<(\/?)([a-zA-Z][\w:-]*)[^>]*?(\/?)>/g,(m,c,n,sf)=>{if(sf)return m;if(c){const k=st.lastIndexOf(n);if(k>=0)st.length=k}else st.push(n);return m});
+  return t+st.reverse().map(n=>'</'+n+'>').join('')}
+function cleanSvg(raw){const m=tidy(raw);if(!m)return null;
+  const doc=new DOMParser().parseFromString(m,'image/svg+xml');if(doc.querySelector('parsererror'))return null;
+  if(doc.querySelectorAll('path,rect,circle,ellipse,polygon,line,polyline').length<3)return null;
+  doc.querySelectorAll('script,foreignObject,iframe,use').forEach(n=>n.remove());
+  doc.querySelectorAll('*').forEach(n=>[...n.attributes].forEach(x=>{if(/^on/i.test(x.name)||/javascript:|https?:/i.test(x.value)&&/href/i.test(x.name))n.removeAttribute(x.name)}));
+  const r=doc.documentElement;if(!r.getAttribute('viewBox')){const w=parseFloat(r.getAttribute('width'))||512,h=parseFloat(r.getAttribute('height'))||512;r.setAttribute('viewBox','0 0 '+w+' '+h)}
+  const v=r.getAttribute('viewBox').split(/[\s,]+/).map(Number);r.setAttribute('width',v[2]);r.setAttribute('height',v[3]);r.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  return new XMLSerializer().serializeToString(r)}
+const cnt=x=>(x.match(/<(path|rect|circle|ellipse|polygon|line|polyline)\b/g)||[]).length;
+async function genImage(text,prog){const st=S.img,r=RATIOS[st.ratio]||RATIOS['1:1'],sty=STY[st.style]||STY.auto;
+  prog(L('Planejando a composição…'));const plan=(await aiCall(planPrompt(text,sty,r),()=>{})).trim();
+  const raw=await aiCall(imgPrompt(text,plan,sty,r),x=>prog(L('Desenhando…')+' '+cnt(x)),'complex');
+  let svg=cleanSvg(raw);if(!svg){prog(L('Corrigindo o desenho…'));svg=cleanSvg(await aiCall(fixPrompt(raw),()=>{},'complex'))}
+  return svg}
+const FXS=[['vig','Vinheta'],['gr','Granulado'],['glow','Brilho'],['frm','Moldura'],['cin','Cinema']];
+const FXP=[['vig','Vinheta'],['gr','Granulado'],['glow','Brilho'],['cin','Cinema']];
+function applyFx(svg,fx){if(!fx||!fx.length)return svg;const o=svg.match(/<svg[^>]*>/)[0];
+  const [x,y,w,h]=((o.match(/viewBox="([^"]+)"/)||[0,'0 0 512 512'])[1]).split(/[\s,]+/).map(Number);
+  const inner=svg.slice(o.length,svg.lastIndexOf('</svg>'));let defs='',top='',base='<g>'+inner+'</g>';
+  const R=e=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" '+e+'/>';
+  if(fx.includes('glow')){defs+='<filter id="nfg" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="'+(w/45)+'"/></filter>';base='<g filter="url(#nfg)" opacity=".55" style="mix-blend-mode:screen">'+inner+'</g>'+base}
+  if(fx.includes('cin')){defs+='<linearGradient id="nfc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a4a" stop-opacity=".35"/><stop offset="1" stop-color="#1f6f8f" stop-opacity=".4"/></linearGradient>';top+=R('fill="url(#nfc)" style="mix-blend-mode:soft-light"')}
+  if(fx.includes('vig')){defs+='<radialGradient id="nfv" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".6"/></radialGradient>';top+=R('fill="url(#nfv)"')}
+  if(fx.includes('gr')){defs+='<filter id="nfn" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .5 0"/></filter>';top+=R('filter="url(#nfn)" opacity=".4"')}
+  if(fx.includes('frm')){const p=w*.035;top+='<rect x="'+(x+p/2)+'" y="'+(y+p/2)+'" width="'+(w-p)+'" height="'+(h-p)+'" fill="none" stroke="#fff" stroke-width="'+p+'"/>'}
+  return o+'<defs>'+defs+'</defs>'+base+top+'</svg>'}
+
+// ===== Imagens realistas: renderizador de cenas =====
+const rng=seed=>{let a=seed>>>0;return()=>{a=a+0x6D2B79F5>>>0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+const mkNoise=R=>{const p=Array.from({length:512},R);return x=>{const i=Math.floor(x),f=x-i,u=f*f*(3-2*f);return p[i&511]*(1-u)+p[(i+1)&511]*u}};
+const fbm=(n,x,o=5)=>{let v=0,a=.5,f=1;for(let i=0;i<o;i++){v+=a*n(x*f);f*=2;a*=.5}return v};
+const hx=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16));
+const mx=(a,b,t,al)=>{const A=hx(a),B=hx(b);return 'rgba('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+','+(al==null?1:al)+')'};
+const ra=(c,a)=>'rgba('+hx(c).join(',')+','+a+')';
+const TM={
+dawn:{sky:['#2b3a6b','#8c6a9e','#f4a77a','#ffd9a0'],sun:'#ffd08a',sy:.6,mt:['#a98aa8','#2b2a45'],fog:'#f2b79a',cl:['#ffc9a0','#6a4a7a']},
+day:{sky:['#2f6fc4','#6fa8e6','#b9dcf5','#eaf4fb'],sun:'#fffbe8',sy:.26,mt:['#a9bdd6','#2f4660'],fog:'#dbeaf5',cl:['#ffffff','#9fb3c8']},
+sunset:{sky:['#1d2a5a','#7a3f7c','#e8644a','#ffb347'],sun:'#ffd27a',sy:.62,mt:['#b06a7a','#1a1430'],fog:'#f08a5a',cl:['#ffb08a','#4a2a5a']},
+night:{sky:['#02060f','#091433','#16254f','#2b3d6b'],sun:'#eef2ff',sy:.24,mt:['#2a3b66','#03050c'],fog:'#26365e',cl:['#3a4a7a','#0a1230']},
+storm:{sky:['#1a1f27','#37414c','#5a6572','#8a959f'],sun:'#d5dce2',sy:.3,mt:['#5b6672','#151a20'],fog:'#7d8893',cl:['#6f7b88','#1a2027']}};
+const TIMES=[['dawn','Amanhecer'],['day','Dia'],['sunset','Pôr do sol'],['night','Noite'],['storm','Tempestade']];
+function parseScene(text){const t=norm(text),has=r=>r.test(t),R=Math.random;
+  let time='day';if(has(/noite|night|noche|nuit|estrela|stars?\b|\blua\b|moon|luna|lune|etoile/))time='night';else if(has(/por do sol|entardecer|sunset|atardecer|puesta de sol|coucher|crepusculo|dusk|anoitecer/))time='sunset';else if(has(/nascer do sol|amanhecer|sunrise|dawn|amanecer|aube|madrugada/))time='dawn';else if(has(/tempestade|storm|tormenta|orage|chuva|rain|lluvia|pluie|trovoada/))time='storm';
+  let terrain='mountains';if(has(/deserto|desert|duna|dune|desierto/))terrain='desert';else if(has(/oceano|\bmar\b|\bsea\b|ocean|praia|beach|playa|plage|\bmer\b/))terrain='ocean';else if(has(/cidade|city|skyline|ciudad|ville/))terrain='city';else if(has(/floresta|forest|bosque|foret|pinheiro|pine/))terrain='forest';else if(has(/campo|plain|field|prado|llanura|plaine/))terrain='plain';
+  return{time,terrain,water:terrain==='ocean'||has(/lago|lake|\blac\b|\brio\b|river|reflexo|reflection|reflejo|reflet/),snow:has(/neve|snow|nieve|neige|nevado/),moon:time==='night',
+    clouds:time==='storm'?.95:time==='night'?.25:.3+R()*.45,fog:has(/neblina|fog|mist|niebla|brouillard|nevoeiro|bruma/)?.7:.12,birds:has(/passaro|bird|pajaro|oiseau/),
+    seed:Math.floor(R()*1e9),ratio:S.img.ratio,fx:S.img.fx.slice()}}
+async function aiScene(text,prev){
+  const p='Converta o pedido em parâmetros de uma cena de paisagem em JSON. Campos: time (dawn|day|sunset|night|storm), terrain (mountains|desert|ocean|forest|city|plain), water (true|false), snow (true|false), moon (true|false), clouds (0 a 1), fog (0 a 1), birds (true|false).'+(prev?' Cena atual: '+JSON.stringify({time:prev.time,terrain:prev.terrain,water:prev.water,snow:prev.snow,moon:prev.moon,clouds:prev.clouds,fog:prev.fog,birds:prev.birds})+'. Aplique a alteração pedida e mantenha o resto.':'')+' Pedido: "'+text+'". Responda SOMENTE com o JSON.';
+  const m=(await aiCall(p,()=>{})).match(/\{[\s\S]*\}/);if(!m)return{};const j=JSON.parse(m[0]),o={};
+  if(TM[j.time])o.time=j.time;if(['mountains','desert','ocean','forest','city','plain'].includes(j.terrain))o.terrain=j.terrain;
+  ['water','snow','moon','birds'].forEach(k=>{if(typeof j[k]==='boolean')o[k]=j[k]});['clouds','fog'].forEach(k=>{if(typeof j[k]==='number')o[k]=Math.max(0,Math.min(1,j[k]))});return o}
+function renderScene(cv,sc,W){const rt=RATIOS[sc.ratio||'1:1'],H=Math.round(W*rt[1]/rt[0]);cv.width=W;cv.height=H;const g=cv.getContext('2d');
+  const R=rng(sc.seed),n=mkNoise(rng(sc.seed+7)),T=TM[sc.time]||TM.day,fx=sc.fx||[],terr=sc.terrain||'mountains',night=sc.time==='night';
+  const water=sc.water||terr==='ocean',hz=Math.round(H*(water?.6:.66)),sx=W*(.22+.56*R()),sy=H*T.sy;let gr;
+  gr=g.createLinearGradient(0,0,0,hz);T.sky.forEach((c,i)=>gr.addColorStop(i/3,c));g.fillStyle=gr;g.fillRect(0,0,W,H);
+  if(night){for(let i=0;i<3500;i++){const u=R(),s=R()+R()+R()-1.5;g.fillStyle='rgba('+(190+R()*60|0)+','+(200+R()*50|0)+',255,'+(.1+R()*.45)+')';g.fillRect(W*u+s*W*.02,H*(.04+.42*(1-u))+s*H*.12,W*(.0004+R()*.0007),W*(.0004+R()*.0007))}
+    for(let i=0;i<1300;i++){g.fillStyle='rgba(255,255,255,'+(.2+R()*.8)+')';const r=.4+R()*R()*1.6*W/900;g.beginPath();g.arc(W*R(),hz*.95*R(),r,0,6.283);g.fill()}}
+  g.globalCompositeOperation='screen';gr=g.createRadialGradient(sx,sy,0,sx,sy,W*.55);gr.addColorStop(0,ra(T.sun,.85));gr.addColorStop(.12,ra(T.sun,.35));gr.addColorStop(1,ra(T.sun,0));g.fillStyle=gr;g.fillRect(0,0,W,H);g.globalCompositeOperation='source-over';
+  if(sc.time!=='storm'){g.fillStyle=T.sun;g.beginPath();g.arc(sx,sy,W*(night?.03:.027),0,6.283);g.fill();
+    if(night){for(let k=0;k<9;k++){g.fillStyle='rgba(120,130,165,'+(.12+R()*.2)+')';g.beginPath();g.arc(sx+(R()-.5)*W*.04,sy+(R()-.5)*W*.04,W*(.003+R()*.006),0,6.283);g.fill()}}}
+  const cl=sc.clouds==null?.5:sc.clouds;
+  for(let i=0;i<260*cl;i++){const cx=W*R(),cy=hz*(.06+.74*R()*R()),rr=W*(.05+.09*R()),lit=Math.max(0,1-Math.hypot(cx-sx,cy-sy)/(W*.7)),k=Math.min(1,.2+lit*.9);
+    g.save();g.translate(cx,cy);g.scale(2.4,.6+.3*R());gr=g.createRadialGradient(0,0,0,0,0,rr);gr.addColorStop(0,mx(T.cl[1],T.cl[0],k,.17));gr.addColorStop(1,mx(T.cl[1],T.cl[0],k,0));g.fillStyle=gr;g.beginPath();g.arc(0,0,rr,0,6.283);g.fill();g.restore()}
+  const MT=terr==='desert'?[night?'#3b4270':sc.time==='storm'?'#8a8070':'#f0c080',night?'#080a18':'#6a3422']:T.mt;
+  const layers=terr==='desert'?4:terr==='ocean'?1:terr==='city'?0:terr==='plain'?3:5;
+  for(let i=0;i<layers;i++){const k=layers>1?i/(layers-1):1,base=hz-H*.01+i*H*.04*(terr==='plain'?.6:1),amp=H*(terr==='plain'?.05:terr==='ocean'?.05:.2-i*.018),fq=.004+i*.0016,off=R()*1000,pts=[];
+    for(let x=0;x<=W;x+=3){pts.push([x,terr==='desert'?base-amp*.5*(Math.sin(x*fq*.9+off)*.5+.5+.35*n(x*fq*2+off)):base-amp*Math.pow(fbm(n,x*fq*1.2+off),1.35)*2.1])}
+    const miny=Math.min(...pts.map(p=>p[1])),path=()=>{g.beginPath();g.moveTo(0,H);pts.forEach(p=>g.lineTo(p[0],p[1]));g.lineTo(W,H);g.closePath()};
+    gr=g.createLinearGradient(0,miny,0,base+H*.06);gr.addColorStop(0,mx(MT[0],MT[1],k,1));gr.addColorStop(1,mx(T.fog,MT[1],Math.min(1,k*.85),1));path();g.fillStyle=gr;g.fill();
+    g.beginPath();pts.forEach((p,j)=>j?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.strokeStyle=mx(T.sun,MT[0],.3,.3);g.lineWidth=W/700;g.stroke();
+    if(sc.snow&&i>=1){g.save();path();g.clip();gr=g.createLinearGradient(0,miny,0,miny+H*.09);gr.addColorStop(0,'rgba(245,249,255,.9)');gr.addColorStop(1,'rgba(245,249,255,0)');g.fillStyle=gr;g.fillRect(0,miny,W,H*.1);g.restore()}
+    gr=g.createLinearGradient(0,base-H*.05,0,base+H*.04);gr.addColorStop(0,ra(T.fog,0));gr.addColorStop(1,ra(T.fog,(.22+.2*(sc.fog||0))*(1-k*.6)));g.fillStyle=gr;g.fillRect(0,base-H*.05,W,H*.09)}
+  if(terr==='city'){for(let L=0;L<3;L++){const bw=W/(18-L*4),col=mx(T.mt[0],T.mt[1],.35+L*.3,1),by=hz+H*.02;let x=-R()*bw;
+    while(x<W){const w=bw*(.6+R()*1.1),h=H*(.1+.22*R()*(1-L*.2));g.fillStyle=col;g.fillRect(x,by-h,w,h+H*.1);
+      if(night||sc.time==='sunset'){g.fillStyle='rgba(255,214,130,'+(.5+.4*R())+')';for(let wy=by-h+6;wy<by-4;wy+=H*.013)for(let wx=x+4;wx<x+w-4;wx+=W*.012)if(R()<.45)g.fillRect(wx,wy,W*.006,H*.006)}
+      x+=w+R()*bw*.15}}}
+  if(water){gr=g.createLinearGradient(0,hz,0,H);gr.addColorStop(0,mx(T.sky[3],T.sky[1],.3,1));gr.addColorStop(1,mx(T.sky[0],T.mt[1],.5,1));g.fillStyle=gr;g.fillRect(0,hz,W,H-hz);
+    g.save();g.beginPath();g.rect(0,hz,W,H-hz);g.clip();g.translate(0,2*hz);g.scale(1,-1);g.globalAlpha=.5;g.drawImage(cv,0,0);g.restore();
+    gr=g.createLinearGradient(0,hz,0,H);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,10,25,.55)');g.fillStyle=gr;g.fillRect(0,hz,W,H-hz);
+    for(let i=0;i<420;i++){const d=Math.pow(R(),1.8),y=hz+d*(H-hz);g.fillStyle=R()<.5?'rgba(255,255,255,.07)':'rgba(0,0,0,.1)';g.fillRect(W*R(),y,W*(.01+.05*R())*(1+d*2),1+H*.004*d)}
+    g.globalCompositeOperation='screen';for(let i=0;i<260;i++){const d=Math.pow(R(),1.6),y=hz+d*(H-hz),half=W*.012+d*W*.08;g.fillStyle=ra(T.sun,.4*(1-d));g.fillRect(sx+(R()-.5)*2*half,y,W*(.01+.04*R()),1+R()*2)}
+    g.globalCompositeOperation='source-over';g.fillStyle=ra(T.fog,.4);g.fillRect(0,hz-1,W,2)}
+  if(!water&&terr!=='city'){const dark=terr==='desert'?mx(MT[1],'#000000',.3,1):mx(T.mt[1],'#000000',.55,1);g.fillStyle=dark;g.beginPath();g.moveTo(0,H);for(let x=0;x<=W;x+=4)g.lineTo(x,H*(.9-.06*fbm(n,x*.003+90,3)));g.lineTo(W,H);g.fill();
+    if(terr==='forest'||terr==='mountains'){const N=terr==='forest'?70:22;for(let i=0;i<N;i++){const x=W*R(),h=H*(.07+.16*R()),w=h*.32,by=H*(.93+.07*R());for(let j=0;j<5;j++){const yy=by-h+j*h*.2,ww=w*(.35+j*.18);g.beginPath();g.moveTo(x,yy-h*.12);g.lineTo(x-ww,yy+h*.2);g.lineTo(x+ww,yy+h*.2);g.fill()}}}}
+  if(sc.birds||(sc.time==='sunset'&&R()<.5)){g.strokeStyle='rgba(10,10,20,.7)';g.lineWidth=W/500;for(let i=0;i<6;i++){const x=W*(.3+.4*R()),y=H*(.12+.2*R()),s=W*(.01+.012*R());g.beginPath();g.moveTo(x-s,y);g.quadraticCurveTo(x-s/2,y-s/2,x,y);g.quadraticCurveTo(x+s/2,y-s/2,x+s,y);g.stroke()}}
+  if((sc.fog||0)>.3){gr=g.createLinearGradient(0,hz-H*.25,0,hz+H*.1);gr.addColorStop(0,ra(T.fog,0));gr.addColorStop(.6,ra(T.fog,sc.fog*.45));gr.addColorStop(1,ra(T.fog,0));g.fillStyle=gr;g.fillRect(0,hz-H*.25,W,H*.35)}
+  if(sc.time==='storm'){g.strokeStyle='rgba(200,215,230,.22)';g.lineWidth=W/900;for(let i=0;i<700;i++){const x=W*R(),y=H*R();g.beginPath();g.moveTo(x,y);g.lineTo(x-8*W/900,y+30*W/900);g.stroke()}}
+  if(sc.snow&&sc.time!=='day'){for(let i=0;i<320;i++){g.fillStyle='rgba(255,255,255,'+(.3+R()*.6)+')';g.beginPath();g.arc(W*R(),H*R(),W*(.0015+.002*R()),0,6.283);g.fill()}}
+  if(fx.includes('glow')){g.globalCompositeOperation='screen';gr=g.createRadialGradient(sx,sy,0,sx,sy,W*.7);gr.addColorStop(0,ra(T.sun,.4));gr.addColorStop(1,ra(T.sun,0));g.fillStyle=gr;g.fillRect(0,0,W,H);g.globalCompositeOperation='source-over'}
+  if(fx.includes('cin')){g.globalCompositeOperation='soft-light';gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,'rgba(255,170,90,.55)');gr.addColorStop(1,'rgba(20,110,140,.65)');g.fillStyle=gr;g.fillRect(0,0,W,H);g.globalCompositeOperation='source-over'}
+  if(fx.includes('vig')){gr=g.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.hypot(W,H)*.55);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,0,.55)');g.fillStyle=gr;g.fillRect(0,0,W,H)}
+  if(fx.includes('gr')){const tl=document.createElement('canvas');tl.width=tl.height=128;const tg=tl.getContext('2d'),id=tg.createImageData(128,128);for(let i=0;i<id.data.length;i+=4){id.data[i]=id.data[i+1]=id.data[i+2]=R()*255;id.data[i+3]=34}tg.putImageData(id,0,0);
+    const s=W/960;g.save();g.scale(s,s);g.fillStyle=g.createPattern(tl,'repeat');g.fillRect(0,0,W/s,H/s);g.restore()}}
+
+// ===== Cartões de imagem =====
+async function copyText(t){try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy')}catch(x){}a.remove()}
+  $('st').textContent=L('Copiado!');setTimeout(()=>{if($('st').textContent===L('Copiado!'))$('st').textContent=''},1500)}
+async function dl(name,data){try{const d=await claude.use('downloads');if(!d)throw 0;await d.save({filename:name,data})}catch(e){$('st').textContent=L('Não consegui baixar aqui. Use Copiar.')}}
+function mk(i,l,fn){const b=document.createElement('button');b.type='button';b.innerHTML=ic(i)+esc(l);b.onclick=fn;return b}
+const rowEl=()=>{const r=document.createElement('div');r.className='row';return r};
+function chip(l,on,fn){const b=document.createElement('button');b.type='button';b.className='ch'+(on?' on':'');b.textContent=L(l);b.onclick=fn;return b}
+const svgUri=x=>'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(x);
+function refineBox(placeholder,run){const rf=document.createElement('div');rf.className='rin';const inp=document.createElement('input');inp.placeholder=L(placeholder);inp.setAttribute('aria-label',L('Refinar'));
+  const rb=mk('image',L('Refinar'),()=>run(inp));rb.style.flex='none';inp.onkeydown=e=>{if(e.key==='Enter')rb.click()};rf.append(inp,rb);return rf}
+function imgCard(d,m){const w=document.createElement('div');w.className='imgc';const im=new Image();im.alt='';
+  const cur=()=>applyFx(m.img,m.fx||[]);const show=()=>{im.src=svgUri(cur())};show();
+  const fr=rowEl();FXS.forEach(([id,l])=>{const b=chip(l,(m.fx||[]).includes(id),()=>{const a=m.fx=m.fx||[],i=a.indexOf(id);i<0?a.push(id):a.splice(i,1);b.classList.toggle('on',i<0);show();save()});fr.appendChild(b)});
+  const row=rowEl();
+  row.appendChild(mk('down','PNG',()=>{const sv=cur(),v=(sv.match(/viewBox="([^"]+)"/)||[0,'0 0 512 512'])[1].split(/[\s,]+/).map(Number);
+    const i=new Image();i.onload=()=>{const W=1600,H=Math.round(W*v[3]/v[2]),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(i,0,0,W,H);c.toBlob(b=>b&&dl('nova-imagem.png',b))};i.src=svgUri(sv)}));
+  row.appendChild(mk('down','SVG',()=>dl('nova-imagem.svg',cur())));row.appendChild(mk('copy',L('Copiar'),()=>copyText(cur())));
+  if(m.p)row.appendChild(mk('spark',L('Variação'),()=>ask(m.p,'img')));
+  w.append(im,fr,row,refineBox('Refinar: deixe mais escuro, adicione a lua…',async inp=>{const ins=inp.value.trim();if(!ins||busy)return;busy=true;im.style.opacity='.4';$('st').textContent=L('Refinando…');
+    try{const n=cleanSvg(await aiCall(refinePrompt(m.img,ins),x=>{$('st').textContent=L('Refinando…')+' '+cnt(x)},'complex'));if(!n)throw{code:'badsvg'};m.img=n;inp.value='';save();show();$('st').textContent=''}
+    catch(e){$('st').textContent=e&&e.code==='badsvg'?L('Não consegui criar a imagem. Tente descrever de outro jeito.'):errText(e)}
+    im.style.opacity='';busy=false}));d.appendChild(w)}
+function photoCard(d,m){const sc=m.photo,w=document.createElement('div');w.className='imgc';const cv=document.createElement('canvas');cv.className='pc';cv.setAttribute('role','img');
+  const draw=()=>{try{renderScene(cv,sc,960)}catch(e){$('st').textContent=L('Não consegui criar a imagem. Tente descrever de outro jeito.')}};
+  const ctl=document.createElement('div');
+  const build=()=>{ctl.innerHTML='';const r1=rowEl(),r2=rowEl();
+    TIMES.forEach(([id,l])=>r1.appendChild(chip(l,sc.time===id,()=>{sc.time=id;if(id==='night')sc.moon=true;upd()})));
+    r2.appendChild(chip('Neblina',(sc.fog||0)>.4,()=>{sc.fog=(sc.fog||0)>.4?.1:.7;upd()}));
+    FXP.forEach(([id,l])=>r2.appendChild(chip(l,(sc.fx||[]).includes(id),()=>{const a=sc.fx=sc.fx||[],i=a.indexOf(id);i<0?a.push(id):a.splice(i,1);upd()})));ctl.append(r1,r2)};
+  const upd=()=>{draw();build();save()};
+  const big=(type,ext)=>{const c=document.createElement('canvas');renderScene(c,sc,1920);c.toBlob(b=>b&&dl('nova-foto.'+ext,b),type,.93)};
+  const row=rowEl();row.append(mk('down','PNG',()=>big('image/png','png')),mk('down','JPG',()=>big('image/jpeg','jpg')),mk('spark',L('Variação'),()=>{sc.seed=Math.floor(Math.random()*1e9);upd()}));
+  draw();build();
+  w.append(cv,ctl,row,refineBox('Refinar: mais neblina, adicione a lua…',async inp=>{const ins=inp.value.trim();if(!ins)return;$('st').textContent=L('Refinando…');
+    try{Object.assign(sc,await aiScene(ins,sc));inp.value='';upd()}catch(e){$('st').textContent=errText(e);return}$('st').textContent=''}));d.appendChild(w)}
+
+// ===== Mensagens =====
+const box=$('msgs'),DOTS='<span class="dots"><span></span><span></span><span></span></span>';
+function fmt(el,s){el.textContent='';s.split(/(\*\*[^*]+\*\*)/).forEach(p=>{if(/^\*\*[^*]+\*\*$/.test(p)){const b=document.createElement('b');b.textContent=p.slice(2,-2);el.appendChild(b)}else el.appendChild(document.createTextNode(p))})}
+function codeBlock(d,lang,code,auto){const w=document.createElement('div');w.className='cb';const h=document.createElement('div');h.className='cbh';
+  const l=document.createElement('span');l.textContent=lang||'code';h.appendChild(l);h.appendChild(mk('copy',L('Copiar'),()=>copyText(code)));
+  const ext={html:'html',htm:'html',svg:'svg',lua:'lua',css:'css',js:'js',javascript:'js'}[(lang||'').toLowerCase()]||'txt';
+  h.appendChild(mk('down',L('Baixar'),()=>dl('nova-codigo.'+ext,code)));
+  if(/^(html|htm|svg)$/i.test(lang)){let fr=null;const pb=mk('eye',L('Prévia'),()=>{if(fr){fr.remove();fr=null;return}fr=document.createElement('iframe');fr.setAttribute('sandbox','allow-scripts');fr.title='Preview';fr.srcdoc=code;w.appendChild(fr)});h.appendChild(pb);if(auto)pb.click()}
+  const pre=document.createElement('pre'),c=document.createElement('code');c.textContent=code.replace(/\n$/,'');pre.appendChild(c);w.append(h,pre);d.appendChild(w)}
+function rich(d,t,auto){d.textContent='';t.split(/```(\w*)\n?([\s\S]*?)```/).forEach((p,i,a)=>{if(i%3===0){if(p.trim()){const s=document.createElement('div');fmt(s,p.trim());d.appendChild(s)}}else if(i%3===2)codeBlock(d,a[i-1],p,auto)})}
+function addLink(d,q){const a=document.createElement('a');a.href=gUrl(q);a.target='_blank';a.rel='noopener noreferrer';a.innerHTML=ic('search')+'Google '+ic('ext');d.appendChild(a)}
+function speak(t){if(!S.voice||!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[•\n*]/g,' '));u.lang=speechLang();
+  const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.toLowerCase().startsWith(u.lang.slice(0,2).toLowerCase()));if(v)u.voice=v;speechSynthesis.speak(u)}
+function addActs(d,t){if(!t||t.includes('```'))return;const a=document.createElement('div');a.className='acts';
+  const c=document.createElement('button');c.type='button';c.innerHTML=ic('copy');c.setAttribute('aria-label',L('Copiar'));c.onclick=()=>copyText(t);
+  const s=document.createElement('button');s.type='button';s.innerHTML=ic('vol');s.setAttribute('aria-label','Speak');s.onclick=()=>{const v=S.voice;S.voice=true;speak(t);S.voice=v};a.append(c,s);d.appendChild(a)}
+function decorate(d,m){if(m.img)imgCard(d,m);if(m.photo)photoCard(d,m);if(m.g)addLink(d,m.g);if(!m.img&&!m.photo)addActs(d,m.t)}
+function bubble(r,t,m){const d=document.createElement('div');d.className='m '+r;
+  if(r==='a'&&t&&t.includes('```'))rich(d,t);else if(r==='a')fmt(d,t||'');else d.textContent=t||'';if(m)decorate(d,m);box.appendChild(d);box.scrollTop=box.scrollHeight;return d}
+function hero(){box.innerHTML='';const h=document.createElement('div');h.id='hero';const n=uname();
+  h.innerHTML='<div class="orb big">'+ic('spark')+'</div><h2>'+esc(L('Olá')+(n?', '+n:'')+'!')+'</h2><p>'+esc(L('Como posso ajudar hoje?'))+'</p><div class="cards"></div>';
+  [['image','Crie uma imagem realista de um pôr do sol na montanha'],['code','Crie uma página HTML de relógio'],['search','Pesquise sobre buracos negros'],['spark','Quanto é 15 vezes 8?']].forEach(([i,s])=>{const b=document.createElement('button');b.type='button';b.innerHTML=ic(i)+'<span>'+esc(L(s))+'</span>';b.onclick=()=>ask(L(s));h.querySelector('.cards').appendChild(b)});box.appendChild(h)}
+function renderChat(){const c=chat();$('title').textContent=c.title||L('Nova conversa');renderList();if(!c.msgs.length){hero();return}box.innerHTML='';c.msgs.forEach(m=>bubble(m.r,m.t,m.r==='a'?m:null))}
+function renderList(){const l=$('list');l.innerHTML='';
+  S.chats.forEach((c,i)=>{const w=document.createElement('div');w.className='ci'+(c.id===S.cur?' cur':'');w.style.animationDelay=i*40+'ms';
+    const a=document.createElement('button');a.textContent=c.title||L('Nova conversa');a.onclick=()=>{S.cur=c.id;save();renderChat();toggle(false)};
+    const x=document.createElement('button');x.innerHTML=ic('x');x.setAttribute('aria-label','Delete');
+    x.onclick=()=>{S.chats=S.chats.filter(z=>z.id!==c.id);if(!S.chats.length)newChat();else if(S.cur===c.id)S.cur=S.chats[0].id;save();renderChat()};w.append(a,x);l.appendChild(w)})}
+function toggle(o){const v=o===undefined?!$('side').classList.contains('open'):o;$('side').classList.toggle('open',v);$('scrim').classList.toggle('open',v)}
+function typeIn(d,t){return new Promise(res=>{if(RM||t.length<3){d.textContent=t;return res()}d.classList.add('cur');let i=0;
+  const iv=setInterval(()=>{i+=2;d.textContent=t.slice(0,i);box.scrollTop=box.scrollHeight;if(i>=t.length){clearInterval(iv);d.classList.remove('cur');fmt(d,t);res()}},16)})}
+let busy=false;
+async function askCore(text,force){text=text.trim();if(!text||busy)return;busy=true;const c=chat();
+  c.msgs.push({r:'u',t:text});const h=$('hero');if(h)h.remove();bubble('u',text);S.acc.msgs++;
+  if(!c.title){c.title=text.slice(0,28);$('title').textContent=c.title;renderList()}
+  const d=bubble('a','');d.innerHTML=DOTS;
+  let r=force?{img:text}:null;if(!force){try{r=think(text)}catch(e){r=L('Não consegui agora. Tente de novo em instantes.')}}
+  const kind=r&&r.img?'img':r&&r.code?'code':'web',q=r&&r.web?r.web:text,photo=kind==='img'&&['auto','real'].includes(S.img.style)&&LAND.test(norm(text));
+  if((r===null||typeof r==='object')&&!S.online&&!photo)r=L('Não sei isso ainda e a busca na web está desligada.');
+  if(typeof r==='string'){await new Promise(z=>setTimeout(z,250+Math.random()*300));await typeIn(d,r);const m={r:'a',t:r};c.msgs.push(m);addActs(d,r);speak(r)}
+  else if(photo){
+    d.innerHTML='<div class="shim"></div><small>'+esc(L('Criando a imagem…'))+'</small>';$('st').textContent=L('Criando a imagem…');
+    const sc=parseScene(text);if(S.img.time!=='auto'&&TM[S.img.time])sc.time=S.img.time;if(sc.time==='night')sc.moon=true;
+    if(S.online){try{Object.assign(sc,await aiScene(text));if(S.img.time!=='auto'&&TM[S.img.time])sc.time=S.img.time}catch(e){}}
+    sc.prompt=text;
+    const m={r:'a',t:L('Sua imagem está pronta. Ajuste a hora do dia, o acabamento ou peça uma variação.'),photo:sc};
+    d.textContent=m.t;await new Promise(z=>setTimeout(z,60));decorate(d,m);c.msgs.push(m);S.acc.images++;speak(L('Sua imagem está pronta.'));$('st').textContent=''}
+  else{
+    $('st').textContent=kind==='img'?L('Criando a imagem…'):kind==='code'?L('Escrevendo o código…'):L('Buscando a resposta…');
+    let out='',ok=true,svg=null;
+    try{
+      if(kind==='img'){d.innerHTML='<div class="shim"></div><small></small>';svg=await genImage(text,x=>{const e=d.querySelector('small');if(e)e.textContent=x;$('st').textContent=x});if(!svg)throw{code:'badsvg'};
+        out=L('Sua imagem está pronta. Use o acabamento, o campo Refinar ou a Variação.')+(S.img.style==='real'?\n'+L('Dica: paisagens saem realistas; seres e objetos têm realismo limitado.'):'')}
+      else{d.classList.add('cur');out=await aiCall(kind==='code'?codePrompt(text):webPrompt(q),x=>{d.textContent=x;box.scrollTop=box.scrollHeight})}
+    }catch(e){out=e&&e.code==='badsvg'?L('Não consegui criar a imagem. Tente descrever de outro jeito.'):errText(e);ok=false;svg=null}
+    d.classList.remove('cur');d.textContent='';if(out.includes('```'))rich(d,out,true);else fmt(d,out);
+    if(ok){if(kind==='web')S.acc.searches++;if(kind==='img')S.acc.images++}
+    const m={r:'a',t:out,g:kind==='web'?q:undefined,img:svg||undefined,fx:svg?S.img.fx.slice():undefined,p:svg?text:undefined};
+    decorate(d,m);c.msgs.push(m);speak(kind==='code'&&ok?L('Pronto, o código está na tela.'):kind==='img'&&ok?L('Sua imagem está pronta.'):out);$('st').textContent=''}
+  save();box.scrollTop=box.scrollHeight;busy=false}
+
+async function ask(text,force){
+  try{return await askCore(text,force)}
+  catch(e){console.error('Nova IA:',e);toast(L('Não consegui agora. Tente de novo em instantes.'))}
+  finally{busy=false;setBusy(false)}
+}
+
+// ===== Perfil, nome, foto, idioma =====
+const AVG=['#1f4fd8,#8a4dff','#e8644a,#ffb347','#0fa37f,#4dd0e1','#d62d3b,#8a4dff','#2b3a6b,#6fa8e6','#444444,#999999'];
+function avHTML(sz){const p=S.profile,n=(uname()||'?')[0].toUpperCase(),st='width:'+sz+'px;height:'+sz+'px;font-size:'+Math.round(sz*.42)+'px;';
+  return /^data:image\//.test(p.photo)?'<div class="av" style="'+st+'background-image:url('+p.photo+')"></div>':'<div class="av" style="'+st+'background:linear-gradient(135deg,'+AVG[p.av%AVG.length]+')">'+esc(n)+'</div>'}
+function loadPhoto(f){if(!f)return;const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(im.width,im.height),c=document.createElement('canvas');c.width=c.height=192;
+  c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,192,192);S.profile.photo=c.toDataURL('image/jpeg',.82);save();syncUI();openProfile()};im.src=fr.result};fr.readAsDataURL(f)}
+function tokenCard(a){return '<div class="card"><b style="display:flex;gap:8px;align-items:center">'+ic('key')+esc(L('Token de usuário'))+'</b>'+
+  (a.utoken?'<code class="tkc">'+esc(a.utoken)+'</code><div class="row"><button data-act="tcopy">'+ic('copy')+esc(L('Copiar'))+'</button><button data-act="tsync">'+ic('cloud')+esc(L('Atualizar nuvem'))+'</button></div>'
+  :'<div class="row" style="margin-top:8px"><button data-act="tgen">'+ic('key')+esc(L('Gerar meu token'))+'</button></div>')+
+  '<div class="rin"><input id="tin" placeholder="'+esc(L('Colar token para entrar'))+'" autocomplete="off"><button data-act="tlogin" style="flex:none">'+esc(L('Entrar'))+'</button></div>'+
+  '<small id="tmsg" style="color:var(--mut)">'+esc(L('Quem tiver o token acessa sua conta. Não compartilhe.'))+'</small></div>'}
+function openProfile(){const a=S.acc,p=S.profile,mode=dbDoc?(cloudOk?L('Conta conectada, salva na nuvem'):L('Conta conectada')):L('Modo visitante, salvo neste aparelho');
+  $('sheet').innerHTML='<div class="who">'+avHTML(64)+'<div><b>'+esc(uname()||L('Visitante'))+'</b><small>'+esc(mode)+'</small></div></div>'+
+  '<div class="card"><small>'+esc(L('Foto de perfil'))+'</small><div class="row" style="margin-top:8px"><label class="btn"><input id="pf" type="file" accept="image/*" hidden>'+ic('camera')+esc(L('Enviar foto'))+'</label>'+(p.photo?'<button data-act="rmphoto">'+ic('trash')+esc(L('Remover foto'))+'</button>':'')+'</div>'+
+  (p.photo?'':'<div class="row" style="margin-top:10px">'+AVG.map((g,i)=>'<button class="avb'+(i===p.av%AVG.length?' on':'')+'" data-act="av:'+i+'" style="background:linear-gradient(135deg,'+g+')" aria-label="Avatar '+(i+1)+'"></button>').join('')+'</div>')+'</div>'+
+  '<div class="card"><small>'+esc(L('Nome de usuário'))+'</small><div class="rin"><input id="un" maxlength="24" value="'+esc(uname())+'"><button data-act="savename" style="flex:none">'+ic('check')+esc(L('Salvar'))+'</button></div></div>'+
+  '<div class="card"><small>'+esc(L('Idioma'))+'</small><div class="rin"><select id="lg"><option value="auto">'+esc(L('Automático (navegador)'))+'</option>'+Object.keys(LN).map(k=>'<option value="'+k+'"'+(S.lang===k?' selected':'')+'>'+LN[k]+'</option>').join('')+'</select></div></div>'+
+  tokenCard(a)+'<div class="card grid"><div><b>'+a.msgs+'</b><span>'+esc(L('mensagens'))+'</span></div><div><b>'+a.images+'</b><span>'+esc(L('imagens'))+'</span></div><div><b>'+a.searches+'</b><span>'+esc(L('buscas'))+'</span></div></div>'+
+  '<div class="row"><button data-act="theme">'+ic(document.documentElement.dataset.theme==='dark'?'sun':'moon')+esc(L('Tema'))+'</button><button data-act="forget">'+ic('trash')+esc(L('Apagar memória da IA'))+'</button><button data-act="cls">'+ic('x')+esc(L('Fechar'))+'</button></div>';
+  $('prof').classList.add('open')}
+$('prof').onclick=e=>{if(e.target.id==='prof')$('prof').classList.remove('open')};
+$('sheet').addEventListener('change',e=>{if(e.target.id==='pf')loadPhoto(e.target.files[0]);if(e.target.id==='lg'){S.lang=e.target.value;LG=curLang();save();applyLang();renderChat();openProfile()}});
+
+// ===== Token de usuário =====
+function genTok(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',b=crypto.getRandomValues(new Uint8Array(16));let t='';b.forEach((x,i)=>{if(i&&i%4===0)t+='-';t+=A[x%A.length]});return 'NOVA-'+t}
+const tmsg=t=>{const e=$('tmsg');if(e)e.textContent=t};
+async function tokPush(){
+  if(!S.acc.utoken)throw 0;
+  const payload={data:snap(),updated:Date.now()};
+  try{
+    if(window.claude){
+      const db=await claude.use('db');
+      if(db){await db.collection('tokens').doc(S.acc.utoken).set(payload);return true}
+    }
+  }catch(e){}
+  try{localStorage.setItem('nova-token-'+S.acc.utoken,JSON.stringify(payload));return true}catch(e){throw e}
+}
+
+// ===== Estúdio de imagens =====
+let stText='';
+const chips=(list,cur,pre)=>list.map(([id,l])=>'<button class="ch'+(cur===id?' on':'')+'" data-act="'+pre+':'+id+'">'+esc(L(l))+'</button>').join('');
+function openStudio(){const i=S.img,el=$('sp');if(el)stText=el.value;
+  $('sheet').innerHTML='<div class="who"><div class="orb">'+ic('image')+'</div><div><b>'+esc(L('Estúdio de imagens'))+'</b><small>'+esc(L('Descreva, escolha o estilo e crie'))+'</small></div></div>'+
+  '<textarea id="sp" rows="3" style="width:100%;margin-bottom:10px" placeholder="'+esc(L('Ex.: um farol numa ilha ao pôr do sol'))+'"></textarea>'+
+  '<div class="card"><small>'+esc(L('Estilo'))+'</small><div class="row" style="margin-top:6px">'+chips(STYL,i.style,'sty')+'</div></div>'+
+  '<div class="card"><small>'+esc(L('Proporção'))+'</small><div class="row" style="margin-top:6px">'+chips([['1:1','Quadrado'],['16:9','Paisagem'],['9:16','Retrato'],['4:3','Foto']],i.ratio,'rat')+'</div></div>'+
+  '<div class="card"><small>'+esc(L('Hora do dia'))+'</small><div class="row" style="margin-top:6px">'+chips([['auto','Automático']].concat(TIMES),i.time,'tm')+'</div></div>'+
+  '<div class="card"><small>'+esc(L('Acabamento'))+'</small><div class="row" style="margin-top:6px">'+FXS.map(([id,l])=>'<button class="ch'+(i.fx.includes(id)?' on':'')+'" data-act="fx:'+id+'">'+esc(L(l))+'</button>').join('')+'</div></div>'+
+  '<div class="row"><button class="go" data-act="make">'+ic('image')+esc(L('Criar imagem'))+'</button><button data-act="cls">'+esc(L('Fechar'))+'</button></div>';
+  $('sp').value=stText;$('prof').classList.add('open')}
+function studioAct(act){const [k,v]=act.split(':'),i=S.img;
+  if(k==='sty')i.style=v;else if(k==='rat')i.ratio=v;else if(k==='tm')i.time=v;
+  else if(k==='fx'){const a=i.fx,j=a.indexOf(v);j<0?a.push(v):a.splice(j,1)}
+  else if(k==='make'){const t=($('sp').value||'').trim();if(!t){$('sp').focus();return true}stText='';$('prof').classList.remove('open');save();ask(t,'img');return true}
+  else return false;
+  save();openStudio();return true}
+$('sheet').onclick=async e=>{const b=e.target.closest('[data-act]');if(!b)return;const act=b.dataset.act;if(studioAct(act))return;
+  try{
+    if(act==='cls')$('prof').classList.remove('open');
+    else if(act==='theme'){S.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';syncUI();save();openProfile()}
+    else if(act==='forget'){S.mem={name:'',facts:[]};save();$('prof').classList.remove('open');$('st').textContent=L('Memória apagada.')}
+    else if(act==='rmphoto'){S.profile.photo='';save();syncUI();openProfile()}
+    else if(act.startsWith('av:')){S.profile.av=+act.slice(3);save();syncUI();openProfile()}
+    else if(act==='savename'){S.profile.name=$('un').value.trim().slice(0,24);save();syncUI();if(!chat().msgs.length)hero();openProfile()}
+    else if(act==='tgen'){S.acc.utoken=genTok();save();await tokPush().catch(()=>{});openProfile()}
+    else if(act==='tcopy'){await copyText(S.acc.utoken);tmsg(L('Token copiado.'))}
+    else if(act==='tsync'){await tokPush();tmsg(window.claude?L('Conta salva na nuvem.'):'Conta salva neste aparelho.')}
+    else if(act==='tlogin'){
+      const v=$('tin').value.trim().toUpperCase();if(!v)return;
+      let raw=null;
+      try{
+        if(window.claude){
+          const db=await claude.use('db');
+          if(db){const sn=await db.collection('tokens').doc(v).get();if(sn.exists)raw=sn.data().data}
+        }
+      }catch(e){}
+      if(!raw){try{const local=localStorage.getItem('nova-token-'+v);if(local)raw=JSON.parse(local).data}catch(e){}}
+      if(!raw){tmsg(L('Token não encontrado.'));return}
+      try{
+        const restored=JSON.parse(raw);
+        S=Object.assign(S,restored);S.acc=S.acc||{};S.acc.utoken=v;
+        if(!Array.isArray(S.chats))S.chats=[];
+        if(!S.chats.length)newChat();
+        if(!chat())S.cur=S.chats[0].id;
+        LG=curLang();save();applyLang();renderChat();tmsg(L('Conta restaurada.'));
+      }catch(e){tmsg(L('Não foi possível agora. Tente de novo.'))}
+    }
+  }catch(err){tmsg(L('Não foi possível agora. Tente de novo.'))}};
+
+// ===== Controles =====
+$('f').onsubmit=e=>{e.preventDefault();const i=$('in'),v=i.value;i.value='';i.style.height='auto';ask(v)};
+$('in').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('f').requestSubmit()}});
+$('in').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px'});
+$('menu').onclick=()=>toggle();$('scrim').onclick=()=>toggle(false);
+$('new').onclick=()=>{newChat();save();renderChat();toggle(false)};
+$('vox').onclick=()=>{S.voice=!S.voice;if(!S.voice&&window.speechSynthesis)speechSynthesis.cancel();syncUI();save()};
+$('web').onclick=()=>{S.online=!S.online;syncUI();save();$('st').textContent=S.online?L('Busca na web ligada.'):L('Busca na web desligada.')};
+$('me').onclick=openProfile;$('studio').onclick=openStudio;
+function applyLang(){document.documentElement.lang=LG;$('in').placeholder=L('Pergunte qualquer coisa…');$('newl').textContent=L('Nova conversa');
+  [['menu','Conversas'],['web','Busca na web'],['vox','Voz da IA'],['me','Perfil'],['mic','Falar'],['studio','Estúdio de imagens'],['send','Enviar']].forEach(([i,k])=>{$(i).setAttribute('aria-label',L(k));$(i).title=L(k)});syncUI()}
+function syncUI(){$('vox').classList.toggle('on',S.voice);$('vox').innerHTML=ic(S.voice?'vol':'mute');$('web').classList.toggle('on',S.online);
+  if(S.theme)document.documentElement.dataset.theme=S.theme;$('me').innerHTML=avHTML(30)}
+
+// ===== Voz =====
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;let rec=null,on=false;
+$('mic').onclick=()=>{
+  if(!SR){$('st').textContent=L('Sem reconhecimento de voz neste navegador.');return}
+  if(on){rec.stop();return}
+  rec=new SR();rec.lang=speechLang();rec.interimResults=true;rec.continuous=false;
+  rec.onstart=()=>{on=true;$('mic').classList.add('rec');$('st').textContent=L('Ouvindo…');if(window.speechSynthesis)speechSynthesis.cancel()};
+  rec.onresult=e=>{let t='',fin=false;for(const r of e.results){t+=r[0].transcript;if(r.isFinal)fin=true}$('in').value=t;if(fin){$('in').value='';ask(t)}};
+  rec.onerror=e=>{$('st').textContent=e.error==='not-allowed'?L('Permita o microfone para falar comigo.'):L('Não consegui ouvir. Tente de novo.')};
+  rec.onend=()=>{on=false;$('mic').classList.remove('rec');if($('st').textContent===L('Ouvindo…'))$('st').textContent=''};
+  try{rec.start()}catch(x){};
+};
+if(window.speechSynthesis)speechSynthesis.getVoices();
+document.querySelectorAll('[data-ic]').forEach(e=>{const s=ic(e.dataset.ic);e.tagName==='SPAN'||e.classList.contains('orb')?e.innerHTML=s:e.insertAdjacentHTML('afterbegin',s)});
+if(!S.acc.joined)S.acc.joined=new Date().toISOString().slice(0,10);
+applyLang();renderChat();save();initAccount();
+
+/* ===== PATCH NOVA IA v6.1 — robustez e melhorias ===== */
+(function(){
+  'use strict';
+
+  // Acessibilidade e feedback visual
+  const toast=(msg,ms=1800)=>{
+    const st=document.getElementById('st');
+    if(!st)return;
+    st.textContent=msg;
+    clearTimeout(window.__novaToast);
+    window.__novaToast=setTimeout(()=>{if(st.textContent===msg)st.textContent=''},ms);
+  };
+  const setBusy=(v)=>{
+    document.body.classList.toggle('busy',!!v);
+    const send=document.getElementById('send');
+    if(send){send.disabled=!!v;send.setAttribute('aria-busy',v?'true':'false')}
+  };
+
+  // Download funciona também sem o ambiente externo.
+  window.dl=async function(name,data){
+    try{
+      let blob;
+      if(data instanceof Blob) blob=data;
+      else if(data instanceof ArrayBuffer) blob=new Blob([data]);
+      else if(typeof data==='string') blob=new Blob([data],{type:name.endsWith('.svg')?'image/svg+xml;charset=utf-8':'text/plain;charset=utf-8'});
+      else throw new Error('unsupported');
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download=name;a.rel='noopener';a.style.display='none';
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1500);
+      toast('✓ '+name);
+      return true;
+    }catch(e){
+      toast(L('Não consegui baixar aqui. Use Copiar.'));
+      return false;
+    }
+  };
+
+  // Clipboard com fallback mais confiável.
+  window.copyText=async function(t){
+    try{
+      if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(String(t));
+      else{
+        const a=document.createElement('textarea');
+        a.value=String(t);a.setAttribute('readonly','');
+        a.style.position='fixed';a.style.opacity='0';
+        document.body.appendChild(a);a.focus();a.select();
+        if(!document.execCommand('copy'))throw new Error('copy');
+        a.remove();
+      }
+      toast(L('Copiado!'));
+      return true;
+    }catch(e){toast('Não foi possível copiar.');return false}
+  };
+
+  // Exportação de imagem robusta: SVG -> PNG/JPG usando Blob URL.
+  window.svgToFile=async function(svg,type,name){
+    return new Promise(resolve=>{
+      try{
+        const m=svg.match(/viewBox=["']([^"']+)["']/i);
+        const v=(m?m[1]:'0 0 512 512').split(/[\s,]+/).map(Number);
+        const W=1600,H=Math.max(1,Math.round(W*v[3]/v[2]));
+        const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+        const url=URL.createObjectURL(blob),im=new Image();
+        im.onload=()=>{
+          const c=document.createElement('canvas');c.width=W;c.height=H;
+          const x=c.getContext('2d');
+          x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(im,0,0,W,H);
+          URL.revokeObjectURL(url);
+          c.toBlob(b=>{if(b)dl(name,b).then(()=>resolve(true));else resolve(false)},type,.94);
+        };
+        im.onerror=()=>{URL.revokeObjectURL(url);resolve(false)};
+        im.src=url;
+      }catch(e){resolve(false)}
+    });
+  };
+
+  // Corrige o botão PNG/SVG das imagens geradas.
+  window.imgCard=function(d,m){
+    const w=document.createElement('div');w.className='imgc';
+    const im=new Image();im.alt='Imagem criada pela Nova IA';im.loading='lazy';
+    const cur=()=>applyFx(m.img,m.fx||[]);
+    const show=()=>{im.src=svgUri(cur())};
+    show();
+    const fr=rowEl();
+    FXS.forEach(([id,l])=>{
+      const b=chip(l,(m.fx||[]).includes(id),()=>{
+        const a=m.fx=m.fx||[],i=a.indexOf(id);
+        if(i<0)a.push(id);else a.splice(i,1);
+        b.classList.toggle('on',i<0);show();save();
+      });
+      fr.appendChild(b);
+    });
+    const row=rowEl();
+    row.appendChild(mk('down','PNG',()=>svgToFile(cur(),'image/png','nova-imagem.png')));
+    row.appendChild(mk('down','JPG',()=>svgToFile(cur(),'image/jpeg','nova-imagem.jpg')));
+    row.appendChild(mk('down','SVG',()=>dl('nova-imagem.svg',cur())));
+    row.appendChild(mk('copy',L('Copiar'),()=>copyText(cur())));
+    if(m.p)row.appendChild(mk('spark',L('Variação'),()=>{if(!busy)ask(m.p,'img')}));
+    w.append(im,fr,row,refineBox('Refinar: deixe mais escuro, adicione a lua…',async inp=>{
+      const ins=inp.value.trim();if(!ins||busy)return;
+      busy=true;setBusy(true);im.style.opacity='.4';toast(L('Refinando…'));
+      try{
+        const n=cleanSvg(await aiCall(refinePrompt(m.img,ins),()=>{},'complex'));
+        if(!n)throw{code:'badsvg'};
+        m.img=n;inp.value='';save();show();toast('✓');
+      }catch(e){
+        toast(e&&e.code==='badsvg'?L('Não consegui criar a imagem. Tente descrever de outro jeito.'):errText(e),3000);
+      }finally{im.style.opacity='';busy=false;setBusy(false)}
+    }));
+    d.appendChild(w);
+  };
+
+  // Canvas de paisagens: download sem depender da nuvem.
+  window.photoCard=function(d,m){
+    const sc=m.photo,w=document.createElement('div');w.className='imgc';
+    const cv=document.createElement('canvas');cv.className='pc';cv.setAttribute('role','img');cv.setAttribute('aria-label','Imagem de paisagem');
+    const draw=()=>{try{renderScene(cv,sc,960)}catch(e){toast(L('Não consegui criar a imagem. Tente descrever de outro jeito.'),3000)}};
+    const ctl=document.createElement('div');
+    const build=()=>{ctl.innerHTML='';const r1=rowEl(),r2=rowEl();
+      [['auto','Automático'],...TIMES].forEach(([id,l])=>r1.appendChild(chip(l,sc.time===id,()=>{
+        if(id==='auto')sc.time=parseScene(sc.prompt||'').time;
+        else sc.time=id;
+        if(id==='night')sc.moon=true;upd();
+      })));
+      r2.appendChild(chip('Neblina',(sc.fog||0)>.4,()=>{sc.fog=(sc.fog||0)>.4?.1:.7;upd()}));
+      FXP.forEach(([id,l])=>r2.appendChild(chip(l,(sc.fx||[]).includes(id),()=>{
+        const a=sc.fx=sc.fx||[],i=a.indexOf(id);i<0?a.push(id):a.splice(i,1);upd();
+      })));
+      ctl.append(r1,r2)
+    };
+    const upd=()=>{draw();build();save()};
+    const big=(type,ext)=>{const c=document.createElement('canvas');renderScene(c,sc,1920);c.toBlob(b=>b&&dl('nova-foto.'+ext,b),type,.93)};
+    const row=rowEl();
+    row.append(mk('down','PNG',()=>big('image/png','png')),mk('down','JPG',()=>big('image/jpeg','jpg')),mk('spark',L('Variação'),()=>{sc.seed=Math.floor(Math.random()*1e9);upd()}));
+    draw();build();
+    w.append(cv,ctl,row,refineBox('Refinar: mais neblina, adicione a lua…',async inp=>{
+      const ins=inp.value.trim();if(!ins||busy)return;
+      busy=true;setBusy(true);toast(L('Refinando…'));
+      try{Object.assign(sc,await aiScene(ins,sc));inp.value='';upd();toast('✓')}
+      catch(e){toast(errText(e),3000)}
+      finally{busy=false;setBusy(false)}
+    }));
+    d.appendChild(w);
+  };
+
+  // Melhor suporte para teclado e fechamento.
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      const p=document.getElementById('prof'),side=document.getElementById('side');
+      if(p&&p.classList.contains('open'))p.classList.remove('open');
+      if(side&&side.classList.contains('open'))toggle(false);
+      if(window.speechSynthesis)speechSynthesis.cancel();
+    }
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){
+      e.preventDefault();document.getElementById('in')?.focus();
+    }
+  });
+
+  // Corrige o botão de voz: estado sempre volta ao normal.
+  const mic=document.getElementById('mic');
+  if(mic){
+    mic.addEventListener('dblclick',()=>{try{rec&&rec.abort()}catch(e){}});
+  }
+
+  // Botão de fechar o perfil ao tocar no fundo + bloqueio de scroll do fundo.
+  const prof=document.getElementById('prof');
+  if(prof){
+    const syncModal=()=>document.body.style.overflow=prof.classList.contains('open')?'hidden':'';
+    new MutationObserver(syncModal).observe(prof,{attributes:true,attributeFilter:['class']});
+  }
+
+  // Indicador de conectividade real.
+  window.addEventListener('online',()=>{S.online=true;syncUI();save();toast('✓ Internet disponível')});
+  window.addEventListener('offline',()=>{S.online=false;syncUI();save();toast('Sem internet — modo local')});
+
+  // Segurança/consistência dos dados carregados.
+  try{
+    S.chats=Array.isArray(S.chats)?S.chats:[];
+    S.mem=S.mem&&typeof S.mem==='object'?S.mem:{name:'',facts:[]};
+    S.mem.facts=Array.isArray(S.mem.facts)?S.mem.facts:[];
+    S.img=S.img&&typeof S.img==='object'?S.img:{style:'auto',ratio:'1:1',time:'auto',fx:['vig','gr']};
+    S.img.fx=Array.isArray(S.img.fx)?S.img.fx:[];
+    S.acc=S.acc&&typeof S.acc==='object'?S.acc:{msgs:0,images:0,searches:0,joined:'',utoken:''};
+    S.profile=S.profile&&typeof S.profile==='object'?S.profile:{name:'',photo:'',av:0};
+    if(!S.chats.length){newChat();save()}
+  }catch(e){console.warn('Dados locais corrigidos',e)}
+
+  // Melhora o botão "Novo chat": não cria dezenas de conversas vazias.
+  const newBtn=document.getElementById('new');
+  if(newBtn)newBtn.onclick=()=>{
+    const c=chat();
+    if(c&&!c.msgs.length){toggle(false);document.getElementById('in')?.focus();return}
+    newChat();save();renderChat();toggle(false);document.getElementById('in')?.focus();
+  };
+
+  // Contagem e estado do envio.
+  const input=document.getElementById('in');
+  if(input){
+    input.setAttribute('aria-label',L('Pergunte qualquer coisa…'));
+    input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,110)+'px'});
+  }
+
+  // Atalhos de envio e foco.
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden && window.speechSynthesis)speechSynthesis.cancel();
+  });
+
+  // Atualiza title e tooltips imediatamente.
+  try{applyLang();syncUI()}catch(e){}
+})();
+
+</script>
+</body>
+</html>
